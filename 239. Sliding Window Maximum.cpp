@@ -2,6 +2,8 @@ class Solution {
 public:
     vector<int> maxSlidingWindow(vector<int>& nums, int k) {
         vector<int> vec;
+        if( nums.size() == 0 || k == 0)
+            return vec;
         int nmax = nums[0];
 
         for(int i = 1; i < k ; ++i )
@@ -15,6 +17,7 @@ public:
 
         for(int i = k ; i < nums.size() && i - k >=0; ++i )
         {
+            nmax = nums[i];
             for(int j = i;j> i-k ; --j)
             {
                 if( nmax < nums[j])
