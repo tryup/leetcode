@@ -29,7 +29,7 @@ public:
             else
             {
                 nmax = nums[i];
-                for(int j = i;j> i-k ; --j)
+                for(int j = i - k + 1;j<=i ; ++j) //前向标记，找到的肯定是最近的最大值优化到60MS，这是什么数据？
                 {
                     if( nmax < nums[j])
                     {
@@ -44,4 +44,5 @@ public:
         return vec;
     }
 };
+
 //标记最近的最大值位置进行优化，由原先300MS=>80MS，说明没有卡数据。
