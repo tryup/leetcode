@@ -3,12 +3,37 @@ struct cachenode
     cachenode(int _key,int _val,int _t):key(_key),val(_val),t(_t) {
 
     }
+
+    bool operator <(const cachenode& lhs) const
+    {
+        return lhs.key<key;
+    }
+    bool operator ==(const cachenode& lhs) const
+    {
+        return lhs.key == key;
+    }
+
+
     int key;
     int val;
     int t;
 };
 
+namespace std
+{
+    template<>
+    struct hash<cachenode>
+    {
+        size_t  operator()(const cachenode& _x) const
+        {
+            return _x.key;
+        }
+    };
+}
+
 class LRUCache{
+
+    typedef std::unordered_map<int,cachenode> hashtable_t;
 public:
     LRUCache(int capacity) {
         m_maxcap = capacity;
@@ -19,8 +44,7 @@ public:
         auto iter = _get(key);
         if( iter!= std::end(m_cachelist) )
         {
-            (*iter).t = m_time;
-            return (*iter).val;
+            return  iter->second.val;
         }
         return -1;
     }
@@ -28,50 +52,27 @@ public:
     void set(int key, int value) {
 
         m_time++;
-        auto iter = _get(key);
+        hashtable_t::iterator iter = _get(key);
         if( iter!= std::end(m_cachelist) )
         {
-            (*iter).val = value;
-            (*iter).t = m_time;
+            iter->second.val = value;
         }
         else
         {
-            if( m_cachelist.size() < m_maxcap )
-            {
-                m_cachelist.push_back( cachenode(key,value,m_time) );
-            }
-            else
-            {
-                //update cache
-                int ind = -1;
-                int min = -1;
-                for(int i = 0 ; i <  m_cachelist.size() ;++i )
-                {
-                    if( m_cachelist[i].t < min || min == -1)
-                    {
-                        min = m_cachelist[i].t;
-                        ind = i;
-                    }
-                }
-                m_cachelist[ind].key = key;
-                m_cachelist[ind].val = value;
-                m_cachelist[ind].t = m_time;
-            }
+            m_cachelist.insert( make_pair(key, cachenode(key,value,0)));
         }
     }
 
 
 
 private:
-    std::vector<cachenode>::iterator _get(int key)
+    hashtable_t::iterator _get(int key)
     {
-        return std::find_if(std::begin(m_cachelist),
-                                 std::end(m_cachelist),
-                                 [&](const cachenode& n)->bool{ return n.key == key;}
-        );
-
+        return m_cachelist.find( key );
     }
     int m_maxcap;
     int m_time = 0;
-    std::vector<cachenode> m_cachelist;// o(n) linear time
+
+    hashtable_t m_cachelist;
+
 };
