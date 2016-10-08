@@ -1,6 +1,6 @@
 struct cachenode
 {
-    cachenode(int _key,int _val,int _t):key(_key),val(_val),t(_t) {
+    cachenode(int _key,int _val,std::list<int>::iterator it):key(_key),val(_val),ttlind(it) {
 
     }
 
@@ -12,12 +12,11 @@ struct cachenode
     {
         return lhs.key == key;
     }
-
-
     int key;
     int val;
-    int t;
+    std::list<int>::iterator ttlind;
 };
+
 
 namespace std
 {
@@ -31,19 +30,21 @@ namespace std
     };
 }
 
-class LRUCache{
 
+class LRUCache{
     typedef std::unordered_map<int,cachenode> hashtable_t;
+    typedef std::list<int> ttllist_t;
 public:
     LRUCache(int capacity) {
         m_maxcap = capacity;
     }
 
     int get(int key) {
-        m_time++;
+
         auto iter = _get(key);
         if( iter!= std::end(m_cachelist) )
         {
+            _updatetimetick(iter->second,false);
             return  iter->second.val;
         }
         return -1;
@@ -51,18 +52,24 @@ public:
 
     void set(int key, int value) {
 
-        m_time++;
         hashtable_t::iterator iter = _get(key);
+
         if( iter!= std::end(m_cachelist) )
         {
             iter->second.val = value;
+            _updatetimetick(iter->second,false);
         }
         else
         {
-            m_cachelist.insert( make_pair(key, cachenode(key,value,0)));
+            if( m_cachelist.size() == m_maxcap )
+            {
+                m_cachelist.erase(m_ttllist.front());
+                m_ttllist.erase(m_ttllist.begin());
+            }
+            cachenode _t(key,value,m_ttllist.insert(m_ttllist.end(),key));
+            m_cachelist.insert( {key,_t});
         }
     }
-
 
 
 private:
@@ -70,9 +77,14 @@ private:
     {
         return m_cachelist.find( key );
     }
+
+
+    void _updatetimetick(cachenode& c,bool f)
+    {
+        m_ttllist.erase(c.ttlind);
+        c.ttlind = m_ttllist.insert( m_ttllist.end(), c.key);
+    }
     int m_maxcap;
-    int m_time = 0;
-
     hashtable_t m_cachelist;
-
+    ttllist_t m_ttllist;
 };
