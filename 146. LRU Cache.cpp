@@ -32,6 +32,7 @@ namespace std
 
 
 class LRUCache{
+
     typedef std::unordered_map<int,cachenode> hashtable_t;
     typedef std::list<int> ttllist_t;
 public:

@@ -8,52 +8,76 @@
  */
 class Solution {
 public:
+    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2)
+    {
+        if( nullptr == l1)
+        {
+            return l2;
+        }
+        if( nullptr == l2 )
+        {
+            return l1;
+        }
+
+        ListNode* root(nullptr);
+        ListNode* cur(nullptr);
+        ListNode* t(nullptr);
+        for( ;; )
+        {
+
+            if(nullptr == l1 && l2 == nullptr)
+            {
+                break;
+            }
+            if( nullptr == l1)
+            {
+                cur->next = l2;
+                break;
+            }
+            if( nullptr == l2)
+            {
+                cur->next = l1;
+                break;
+            }
+
+            if( l1->val < l2->val )
+            {
+                t = l1;
+                l1=l1->next;
+            }
+            else
+            {
+                t = l2;
+                l2=l2->next;
+            }
+            if( nullptr == root )
+            {
+                root = t;
+                cur = t;
+            }
+            else
+            {
+                cur->next = t;
+                cur = cur->next == nullptr ? cur : cur->next;
+            }
+
+        }
+        return root;
+    }
+
     ListNode* mergeKLists(vector<ListNode*>& lists)
     {
         if( lists.size() ==0 )
         {
             return nullptr;
         }
-        ListNode* root = nullptr;
-        ListNode* cur = nullptr;
-        ListNode* t = nullptr;
-        root = GetNext(lists);
-        cur = root;
-        if(nullptr == root )
-        {
-            return root;
+        if( lists.size() == 1) {
+            return lists[0];
         }
-        while(true)
+        for( int i = 1 ; i< lists.size();++i )
         {
-            cur->next = GetNext(lists);
-            if( nullptr == cur->next )
-                break;
-            cur = cur->next;
+            lists[i] = mergeTwoLists(lists[i-1],lists[i]);
         }
-        return  root;
-    }
-
-    ListNode* GetNext(vector<ListNode*>& lists)
-    {
-        ListNode* min = lists[0];
-        int minind = 0;
-        int ind = 0;
-        for( auto &i : lists)
-        {
-            if(nullptr != i )
-            {
-                if( (nullptr == min) ||  (min->val > i->val))
-                {
-                    min = i;
-                    minind = ind;
-                }
-            }
-            ind++;
-        }
-        if(  nullptr != min)
-        {
-            lists[minind] = lists[minind]->next;
-        }
-        return min;
+        return lists[lists.size()-1];
     }
 };
